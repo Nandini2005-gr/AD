@@ -1,6 +1,5 @@
 import sys
 import os
-
 sys.path.append(
     os.path.abspath(
         os.path.join(
@@ -9,25 +8,21 @@ sys.path.append(
         )
     )
 )
-
 import cv2
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-
 from dataset_class import AlzheimerDataset
 from models.vision_mamba import VisionMamba3D
 
-
 # Load trained model
 model = VisionMamba3D()
-
 model.load_state_dict(
     torch.load(
-        "checkpoints/vision_mamba.pth"
+        "../checkpoints/vision_mamba_SUBMIT_FINAL.pth",
+        map_location="cpu"
     )
 )
-
 model.eval()
 
 feature_maps = []
@@ -37,14 +32,14 @@ def hook_fn(module, input, output):
     feature_maps.append(output)
 
 
-# Register hook
 hook = model.mamba3.register_forward_hook(
     hook_fn
 )
 
-# Load test dataset
+# Use test set so heatmaps reflect unseen data, consistent with the
+# accuracy/confusion-matrix numbers already in the report
 dataset = AlzheimerDataset(
-    mode="train"
+    mode="test"
 )
 
 class_names = {
@@ -63,7 +58,6 @@ positions = {
 
 used_classes = set()
 
-# Create single page with 4 heatmaps
 fig, axes = plt.subplots(
     2,
     2,
@@ -80,7 +74,6 @@ for idx in range(len(dataset)):
         continue
 
     used_classes.add(label)
-
     feature_maps.clear()
 
     input_volume = volume.unsqueeze(0)
@@ -114,7 +107,6 @@ for idx in range(len(dataset)):
     )
 
     row, col = positions[label]
-
     ax = axes[row][col]
 
     img = ax.imshow(
@@ -151,13 +143,13 @@ plt.suptitle(
 plt.tight_layout()
 
 plt.savefig(
-    "all_heatmaps.png",
+    "../all_heatmaps_final.png",
     dpi=300,
     bbox_inches="tight"
 )
 
 plt.show()
 
-print("\nSaved: all_heatmaps.png")
+print("\nSaved: all_heatmaps_final.png")
 
 hook.remove()

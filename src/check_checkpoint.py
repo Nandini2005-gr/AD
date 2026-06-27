@@ -15,7 +15,7 @@ from dataset_class import AlzheimerDataset
 from models.vision_mamba import VisionMamba3D
 
 model = VisionMamba3D()
-model.load_state_dict(torch.load("../checkpoints/vision_mamba_SUBMIT.pth", map_location="cpu"))
+model.load_state_dict(torch.load("../checkpoints/vision_mamba_SUBMIT_FINAL.pth", map_location="cpu"))
 model.eval()
 
 test_dataset = AlzheimerDataset(mode="test")

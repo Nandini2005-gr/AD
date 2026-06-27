@@ -15,7 +15,7 @@ LABELS = {
     "Moderate Dementia": 3
 }
 
-TARGET_SIZE = (48, 48)
+TARGET_SIZE = (64, 64)
 TARGET_DEPTH = 61
 
 
