@@ -7,7 +7,7 @@ class PatchEmbedding3D(nn.Module):
     def __init__(
         self,
         in_channels=1,
-        embed_dim=64
+        embed_dim=128
     ):
 
         super().__init__()
@@ -26,13 +26,20 @@ class PatchEmbedding3D(nn.Module):
 
 class MambaBlock(nn.Module):
 
-    def __init__(self, dim=64):
+    def __init__(self, dim=128):
 
         super().__init__()
 
         self.norm = nn.BatchNorm3d(dim)
 
-        self.conv = nn.Conv3d(
+        self.conv1 = nn.Conv3d(
+            dim,
+            dim,
+            kernel_size=3,
+            padding=1
+        )
+
+        self.conv2 = nn.Conv3d(
             dim,
             dim,
             kernel_size=3,
@@ -41,15 +48,21 @@ class MambaBlock(nn.Module):
 
         self.relu = nn.ReLU()
 
+        self.dropout = nn.Dropout3d(0.2)
+
     def forward(self, x):
 
         residual = x
 
         x = self.norm(x)
 
-        x = self.conv(x)
-
+        x = self.conv1(x)
         x = self.relu(x)
+
+        x = self.conv2(x)
+        x = self.relu(x)
+
+        x = self.dropout(x)
 
         x = x + residual
 
@@ -62,19 +75,27 @@ class VisionMamba3D(nn.Module):
 
         super().__init__()
 
-        self.patch_embed = PatchEmbedding3D()
+        self.patch_embed = PatchEmbedding3D(
+            embed_dim=128
+        )
 
-        self.mamba1 = MambaBlock(64)
+        self.mamba1 = MambaBlock(128)
 
-        self.mamba2 = MambaBlock(64)
+        self.mamba2 = MambaBlock(128)
 
-        self.mamba3 = MambaBlock(64)
+        self.mamba3 = MambaBlock(128)
+
+        self.mamba4 = MambaBlock(128)
 
         self.pool = nn.AdaptiveAvgPool3d(1)
 
-        self.classifier = nn.Linear(
-            64,
-            4
+        self.dropout = nn.Dropout(0.5)
+
+        self.classifier = nn.Sequential(
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(64, 4)
         )
 
     def forward(self, x):
@@ -87,12 +108,16 @@ class VisionMamba3D(nn.Module):
 
         x = self.mamba3(x)
 
+        x = self.mamba4(x)
+
         x = self.pool(x)
 
         x = x.view(
             x.size(0),
             -1
         )
+
+        x = self.dropout(x)
 
         x = self.classifier(x)
 

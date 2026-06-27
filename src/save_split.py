@@ -2,7 +2,7 @@ import os
 import json
 from sklearn.model_selection import train_test_split
 
-DATA_PATH = r"E:\Alzheimer_Project\Data"
+DATA_PATH = r"C:\Users\User\Documents\Data"
 
 LABELS = {
     "Non Demented": 0,

@@ -1,6 +1,6 @@
 import os
 
-DATA_PATH = r"E:\Alzheimer_Project\Data"
+DATA_PATH = r"C:\Users\User\Documents\Data"
 
 target_patient = "OAS1_0308"
 

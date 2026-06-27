@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 
-DATA_PATH = r"E:\Alzheimer_Project\Data"
+DATA_PATH = r"C:\Users\User\Documents\Data"
 
 LABELS = {
     "Non Demented": 0,
